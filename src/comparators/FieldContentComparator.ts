@@ -1,24 +1,35 @@
-import { CedarWriters, ChildDeploymentInfo, JSONFieldReader, JSONTemplateFieldWriter, JsonPath } from 'cedar-model-typescript-library';
+import {
+  CedarWriters,
+  ChildDeploymentInfo,
+  ComparisonError,
+  JSONFieldReader,
+  JsonNode,
+  JsonPath,
+  JSONTemplateFieldWriter,
+} from 'cedar-model-typescript-library';
 
 export class FieldContentComparator {
   private static fieldReader: JSONFieldReader = JSONFieldReader.getStrict();
 
-  static compare(parsedContent: any) {
-    let doLog = false;
+  static compare(parsedContent: any): {
+    parsingResultErrors: ComparisonError[];
+    compareResultErrors: ComparisonError[];
+    reSerialized: JsonNode;
+  } {
     const jsonFieldReaderResult = this.fieldReader.readFromObject(parsedContent, ChildDeploymentInfo.empty(), new JsonPath());
 
-    if (jsonFieldReaderResult.parsingResult.getBlueprintComparisonErrorCount() > 0) {
-      console.log('Parsing error count: ' + jsonFieldReaderResult.parsingResult.getBlueprintComparisonErrorCount());
-      doLog = true;
-    }
-    const writers: CedarWriters = CedarWriters.getFebruary2024();
+    const parsingResultErrors = jsonFieldReaderResult.parsingResult.getBlueprintComparisonErrors();
+
+    const writers: CedarWriters = CedarWriters.getStrict();
     const jsonWriter: JSONTemplateFieldWriter = writers.getJSONFieldWriterForField(jsonFieldReaderResult.field);
+    const reSerialized: JsonNode = jsonWriter.getAsJsonNode(jsonFieldReaderResult.field);
 
     const compareResult = JSONFieldReader.getRoundTripComparisonResult(jsonFieldReaderResult, jsonWriter);
-    if (compareResult.getBlueprintComparisonErrorCount() > 0) {
-      console.log('Comparison results: ' + JSON.stringify(compareResult, null, 2));
-      doLog = true;
-    }
-    return doLog;
+    const compareResultErrors = compareResult.getBlueprintComparisonErrors();
+    return {
+      parsingResultErrors,
+      compareResultErrors,
+      reSerialized,
+    };
   }
 }
