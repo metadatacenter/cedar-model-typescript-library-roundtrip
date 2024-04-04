@@ -18,6 +18,7 @@ export class LogProcessor {
     logObject.UUID = uuid;
     logObject.parsingErrorCount = logObject.parsingErrors.length;
     logObject.compareErrorCount = logObject.compareResultErrors.length;
+    logObject.compareWarningCount = logObject.compareResultWarnings.length;
     const shardFolder = this.getShardFolder(uuid);
     this.saveLogObject(logObject, uuid, shardFolder);
   }

@@ -19,11 +19,15 @@ import { SummaryLogProcessor } from '../log/SummaryLogProcessor';
 export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
   private orderCounter = 0;
-  private resourceExportStartPath = '/export/resources';
+  private resourceExportStartPath = '/export-prod-2024-04-03/resources';
   private roundTripLogPath = '/roundtrip';
   private logProcessor: LogProcessor;
+  //
   private logSummary: SummaryLog[] = [];
   private summaryLogProcessor: SummaryLogProcessor;
+  private counter = 0;
+  //
+  // private errorStats:
 
   constructor() {
     this.resourceRootPath = path.join(Config.get().getCedarHome(), this.resourceExportStartPath);
@@ -33,8 +37,10 @@ export class ExportResourceEnumerator {
   }
 
   public async parse(): Promise<void> {
+    this.counter = 0;
     await this.parseDirectory(this.resourceRootPath);
     this.summaryLogProcessor.saveLogObject(this.logSummary);
+    console.log('Total logged:' + this.logSummary.length);
   }
 
   private async parseDirectory(directoryPath: string, virtualPath: string = ''): Promise<void> {
@@ -76,9 +82,9 @@ export class ExportResourceEnumerator {
         zipFilePath.replace(this.resourceRootPath, ''),
         ++this.orderCounter,
       );
-      if (cedarResource.getOrderNumber() % 100 == 0) {
-        console.log(cedarResource.getOrderNumber());
-      }
+      // if (cedarResource.getOrderNumber() % 100 == 0) {
+      //   console.log(cedarResource.getOrderNumber());
+      // }
 
       // If it's a folder, we need to parse its contents too
       if (cedarResource.getType() === 'folder') {
@@ -91,6 +97,7 @@ export class ExportResourceEnumerator {
         const contentJson = await zip.file('content.json')?.async('string');
         let parsingResultErrors: ComparisonError[] = [];
         let compareResultErrors: ComparisonError[] = [];
+        let compareResultWarnings: ComparisonError[] = [];
         let parsedContent: JsonNode = {};
         let reSerialized: JsonNode = {};
         let exception: any | null = null;
@@ -98,11 +105,14 @@ export class ExportResourceEnumerator {
           try {
             parsedContent = ResourceContentParser.parseContentJson(contentJson);
             if (cedarResource.getType() == 'template') {
-              ({ parsingResultErrors, compareResultErrors, reSerialized } = TemplateContentComparator.compare(parsedContent));
+              ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                TemplateContentComparator.compare(parsedContent));
             } else if (cedarResource.getType() == 'element') {
-              ({ parsingResultErrors, compareResultErrors, reSerialized } = ElementContentComparator.compare(parsedContent));
+              ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                ElementContentComparator.compare(parsedContent));
             } else if (cedarResource.getType() == 'field') {
-              ({ parsingResultErrors, compareResultErrors, reSerialized } = FieldContentComparator.compare(parsedContent));
+              ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                FieldContentComparator.compare(parsedContent));
             } else if (cedarResource.getType() == 'instance') {
               //console.log(cedarResource.getOrderNumber() + ' INSTANCE');
             }
@@ -117,6 +127,9 @@ export class ExportResourceEnumerator {
         if (compareResultErrors.length > 0) {
           doLog = true;
         }
+        if (compareResultWarnings.length > 0) {
+          doLog = true;
+        }
         if (exception !== null) {
           doLog = true;
         }
@@ -129,28 +142,36 @@ export class ExportResourceEnumerator {
             .withPhysicalPath(cedarResource.getPhysicalPath())
             .withParsingErrors(parsingResultErrors)
             .withCompareResultErrors(compareResultErrors)
+            .withCompareResultWarnings(compareResultWarnings)
             .withSourceJSON(parsedContent)
             .withTargetJSON(reSerialized)
             .withException(exception)
             .build();
-
           this.logProcessor.processLog(logObject);
-          this.logSummary.push(
-            new SummaryLogBuilder()
-              .withOrderNumber(logObject.orderNumber)
-              .withType(logObject.type)
-              .withUUID(logObject.UUID)
-              .withId(logObject.id)
-              .withName(logObject.name)
-              .withComputedPath(logObject.computedPath)
-              .withPhysicalPath(logObject.physicalPath)
-              .withParsingErrorCount(logObject.parsingErrorCount)
-              .withCompareErrorCount(logObject.compareErrorCount)
-              .withHasException(logObject.exception !== null)
-              .build(),
-          );
 
-          console.log(cedarResource.getOrderNumber());
+          const builder = new SummaryLogBuilder()
+            .withOrderNumber(logObject.orderNumber)
+            .withType(logObject.type)
+            .withUUID(logObject.UUID)
+            .withId(logObject.id)
+            .withName(logObject.name)
+            .withComputedPath(logObject.computedPath)
+            .withPhysicalPath(logObject.physicalPath)
+            .withParsingErrorCount(logObject.parsingErrorCount)
+            .withCompareErrorCount(logObject.compareErrorCount)
+            .withCompareWarningCount(logObject.compareWarningCount)
+            .withHasException(logObject.exception !== null)
+            .withCreatedOn(parsedContent['pav:createdOn'] as string)
+            .withLastUpdatedOn(parsedContent['pav:lastUpdatedOn'] as string)
+            .withCreatedBy(parsedContent['pav:createdBy'] as string);
+          if (typeof parsedContent['description'] !== 'undefined') {
+            builder.withCSV2CEDAR((parsedContent['description'] as string).indexOf('CSV2CEDAR') >= 0);
+          }
+          this.logSummary.push(builder.build());
+          this.counter++;
+          if (this.counter % 1000 == 0) {
+            console.log(this.counter);
+          }
         }
       }
     }

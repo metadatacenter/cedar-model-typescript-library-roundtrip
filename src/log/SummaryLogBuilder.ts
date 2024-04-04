@@ -10,7 +10,12 @@ export class SummaryLogBuilder {
   physicalPath: string;
   parsingErrorCount: number;
   compareErrorCount: number;
+  compareWarningCount: number;
   hasException: boolean;
+  createdOn: string;
+  lastUpdatedOn: string;
+  createdBy: string;
+  isCSV2CEDAR: boolean;
 
   constructor() {
     this.orderNumber = 0;
@@ -22,7 +27,12 @@ export class SummaryLogBuilder {
     this.physicalPath = '';
     this.parsingErrorCount = 0;
     this.compareErrorCount = 0;
+    this.compareWarningCount = 0;
     this.hasException = false;
+    this.createdOn = '';
+    this.lastUpdatedOn = '';
+    this.createdBy = '';
+    this.isCSV2CEDAR = false;
   }
 
   withOrderNumber(orderNumber: number): SummaryLogBuilder {
@@ -70,8 +80,33 @@ export class SummaryLogBuilder {
     return this;
   }
 
+  withCompareWarningCount(compareWarningCount: number): SummaryLogBuilder {
+    this.compareWarningCount = compareWarningCount;
+    return this;
+  }
+
   withHasException(hasException: boolean): SummaryLogBuilder {
     this.hasException = hasException;
+    return this;
+  }
+
+  withCreatedOn(createdOn: string): SummaryLogBuilder {
+    this.createdOn = createdOn;
+    return this;
+  }
+
+  withLastUpdatedOn(lastUpdatedOn: string): SummaryLogBuilder {
+    this.lastUpdatedOn = lastUpdatedOn;
+    return this;
+  }
+
+  withCreatedBy(createdBy: string): SummaryLogBuilder {
+    this.createdBy = createdBy;
+    return this;
+  }
+
+  withCSV2CEDAR(isCSV2CEDAR: boolean): SummaryLogBuilder {
+    this.isCSV2CEDAR = isCSV2CEDAR;
     return this;
   }
 

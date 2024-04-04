@@ -2,33 +2,42 @@ import {
   CedarWriters,
   ChildDeploymentInfo,
   ComparisonError,
-  JSONElementReader,
+  JSONTemplateElementReader,
   JsonNode,
   JsonPath,
   JSONTemplateElementWriter,
+  RoundTrip,
+  CedarReaders,
+  CedarJSONWriters,
+  CedarJSONReaders,
 } from 'cedar-model-typescript-library';
 
 export class ElementContentComparator {
-  private static elementReader: JSONElementReader = JSONElementReader.getStrict();
-
   static compare(parsedContent: any): {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
+    compareResultWarnings: ComparisonError[];
     reSerialized: JsonNode;
   } {
-    const jsonElementReaderResult = this.elementReader.readFromObject(parsedContent, ChildDeploymentInfo.empty(), new JsonPath());
+    const readers: CedarJSONReaders = CedarReaders.json().getStrict();
+    const elementReader: JSONTemplateElementReader = readers.getTemplateElementReader();
+
+    const jsonElementReaderResult = elementReader.readFromObject(parsedContent, ChildDeploymentInfo.empty(), new JsonPath());
 
     const parsingResultErrors = jsonElementReaderResult.parsingResult.getBlueprintComparisonErrors();
 
-    const writers: CedarWriters = CedarWriters.getStrict();
+    const writers: CedarJSONWriters = CedarWriters.json().getFebruary2024();
     const jsonWriter: JSONTemplateElementWriter = writers.getJSONTemplateElementWriter();
     const reSerialized: JsonNode = jsonWriter.getAsJsonNode(jsonElementReaderResult.element);
 
-    const compareResult = JSONElementReader.getRoundTripComparisonResult(jsonElementReaderResult, jsonWriter);
+    const compareResult = RoundTrip.compare(jsonElementReaderResult, jsonWriter);
     const compareResultErrors = compareResult.getBlueprintComparisonErrors();
+    const compareResultWarnings = compareResult.getBlueprintComparisonWarnings();
+
     return {
       parsingResultErrors,
       compareResultErrors,
+      compareResultWarnings,
       reSerialized,
     };
   }

@@ -11,8 +11,10 @@ export class ResourceLog {
   physicalPath: string;
   parsingErrorCount: number = 0;
   compareErrorCount: number = 0;
+  compareWarningCount: number = 0;
   parsingErrors: ComparisonError[];
   compareResultErrors: ComparisonError[];
+  compareResultWarnings: ComparisonError[];
   exception: Error | null;
   sourceJSON: JsonNode;
   targetJSON: JsonNode;
@@ -26,6 +28,7 @@ export class ResourceLog {
     this.physicalPath = builder.physicalPath;
     this.parsingErrors = builder.parsingErrors;
     this.compareResultErrors = builder.compareResultErrors;
+    this.compareResultWarnings = builder.compareResultWarnings;
     this.exception = builder.exception;
     this.sourceJSON = builder.sourceJSON;
     this.targetJSON = builder.targetJSON;

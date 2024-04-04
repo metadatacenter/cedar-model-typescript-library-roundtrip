@@ -10,6 +10,7 @@ export class ResourceLogBuilder {
   physicalPath: string = '';
   parsingErrors: ComparisonError[] = [];
   compareResultErrors: ComparisonError[] = [];
+  compareResultWarnings: ComparisonError[] = [];
   exception: Error | null = null;
   sourceJSON: JsonNode = {};
   targetJSON: JsonNode = {};
@@ -52,6 +53,11 @@ export class ResourceLogBuilder {
 
   withCompareResultErrors(compareResultErrors: ComparisonError[]): ResourceLogBuilder {
     this.compareResultErrors = compareResultErrors;
+    return this;
+  }
+
+  withCompareResultWarnings(compareResultWarnings: ComparisonError[]): ResourceLogBuilder {
+    this.compareResultWarnings = compareResultWarnings;
     return this;
   }
 
