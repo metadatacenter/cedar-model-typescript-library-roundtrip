@@ -24,7 +24,7 @@ export class TemplateContentComparator {
 
     const parsingResultErrors = jsonTemplateReaderResult.parsingResult.getBlueprintComparisonErrors();
 
-    const writers: CedarJSONWriters = CedarWriters.json().getFebruary2024();
+    const writers: CedarJSONWriters = CedarWriters.json().getStrict();
     const jsonWriter: JSONTemplateWriter = writers.getJSONTemplateWriter();
     const reSerialized: JsonNode = jsonWriter.getAsJsonNode(jsonTemplateReaderResult.template);
 

@@ -15,6 +15,7 @@ import { ResourceLog } from '../log/ResourceLog';
 import { SummaryLog } from '../log/SummaryLog';
 import { SummaryLogBuilder } from '../log/SummaryLogBuilder';
 import { SummaryLogProcessor } from '../log/SummaryLogProcessor';
+import { InstanceContentComparator } from '../comparators/InstanceContentComparator';
 
 export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
@@ -114,25 +115,26 @@ export class ExportResourceEnumerator {
               ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
                 FieldContentComparator.compare(parsedContent));
             } else if (cedarResource.getType() == 'instance') {
-              //console.log(cedarResource.getOrderNumber() + ' INSTANCE');
+              ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                InstanceContentComparator.compare(parsedContent));
             }
           } catch (e) {
             exception = e;
           }
         }
-        let doLog = false;
-        if (parsingResultErrors.length > 0) {
-          doLog = true;
-        }
-        if (compareResultErrors.length > 0) {
-          doLog = true;
-        }
-        if (compareResultWarnings.length > 0) {
-          doLog = true;
-        }
-        if (exception !== null) {
-          doLog = true;
-        }
+        const doLog = true;
+        // if (parsingResultErrors.length > 0) {
+        //   doLog = true;
+        // }
+        // if (compareResultErrors.length > 0) {
+        //   doLog = true;
+        // }
+        // if (compareResultWarnings.length > 0) {
+        //   doLog = true;
+        // }
+        // if (exception !== null) {
+        //   doLog = true;
+        // }
         if (doLog) {
           const logObject: ResourceLog = ResourceLogBuilder.withOrderNumber(cedarResource.getOrderNumber())
             .withId(cedarResource.getId())
@@ -164,7 +166,7 @@ export class ExportResourceEnumerator {
             .withCreatedOn(parsedContent['pav:createdOn'] as string)
             .withLastUpdatedOn(parsedContent['pav:lastUpdatedOn'] as string)
             .withCreatedBy(parsedContent['pav:createdBy'] as string);
-          if (typeof parsedContent['description'] !== 'undefined') {
+          if (Object.hasOwn(parsedContent, 'description') && typeof parsedContent['description'] == 'string') {
             builder.withCSV2CEDAR((parsedContent['description'] as string).indexOf('CSV2CEDAR') >= 0);
           }
           this.logSummary.push(builder.build());

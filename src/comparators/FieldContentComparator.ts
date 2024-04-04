@@ -26,7 +26,7 @@ export class FieldContentComparator {
 
     const parsingResultErrors = jsonFieldReaderResult.parsingResult.getBlueprintComparisonErrors();
 
-    const writers: CedarJSONWriters = CedarWriters.json().getFebruary2024();
+    const writers: CedarJSONWriters = CedarWriters.json().getStrict();
     const jsonWriter: JSONTemplateFieldWriter = writers.getJSONFieldWriterForField(jsonFieldReaderResult.field);
     const reSerialized: JsonNode = jsonWriter.getAsJsonNode(jsonFieldReaderResult.field);
 
