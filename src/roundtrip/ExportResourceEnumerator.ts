@@ -16,6 +16,7 @@ import { SummaryLog } from '../log/SummaryLog';
 import { SummaryLogBuilder } from '../log/SummaryLogBuilder';
 import { SummaryLogProcessor } from '../log/SummaryLogProcessor';
 import { InstanceContentComparator } from '../comparators/InstanceContentComparator';
+import { ErrorKey } from '../model/ErrorKey';
 
 export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
@@ -28,7 +29,8 @@ export class ExportResourceEnumerator {
   private summaryLogProcessor: SummaryLogProcessor;
   private counter = 0;
   //
-  // private errorStats:
+  private errorStats: Map<string, number> = new Map();
+  private errorStatsLast2: Map<string, number> = new Map();
 
   constructor() {
     this.resourceRootPath = path.join(Config.get().getCedarHome(), this.resourceExportStartPath);
@@ -41,6 +43,8 @@ export class ExportResourceEnumerator {
     this.counter = 0;
     await this.parseDirectory(this.resourceRootPath);
     this.summaryLogProcessor.saveLogObject(this.logSummary);
+    this.summaryLogProcessor.saveErrorStats(this.errorStats, `errors-all.json`);
+    this.summaryLogProcessor.saveErrorStats(this.errorStatsLast2, `errors-last-2.json`);
     console.log('Total logged:' + this.logSummary.length);
   }
 
@@ -122,6 +126,14 @@ export class ExportResourceEnumerator {
             exception = e;
           }
         }
+
+        for (const error of [...parsingResultErrors, ...compareResultErrors, ...compareResultWarnings]) {
+          const key = ErrorKey.fromComparisonError(error).toString();
+          this.errorStats.set(key, (this.errorStats.get(key) || 0) + 1);
+          const key2 = ErrorKey.fromComparisonErrorPartial(error, 2).toString();
+          this.errorStatsLast2.set(key2, (this.errorStatsLast2.get(key2) || 0) + 1);
+        }
+
         const doLog = true;
         // if (parsingResultErrors.length > 0) {
         //   doLog = true;
