@@ -1,10 +1,10 @@
 import {
-  CedarJSONReaders,
+  CedarJsonReaders,
   CedarReaders,
   ComparisonError,
   JsonNode,
   JsonPath,
-  JSONTemplateInstanceReader,
+  JsonTemplateInstanceReader,
 } from 'cedar-model-typescript-library';
 
 export class InstanceContentComparator {
@@ -14,8 +14,8 @@ export class InstanceContentComparator {
     compareResultWarnings: ComparisonError[];
     reSerialized: JsonNode;
   } {
-    const readers: CedarJSONReaders = CedarReaders.json().getStrict();
-    const instanceReader: JSONTemplateInstanceReader = readers.getTemplateInstanceReader();
+    const readers: CedarJsonReaders = CedarReaders.json().getStrict();
+    const instanceReader: JsonTemplateInstanceReader = readers.getTemplateInstanceReader();
 
     const jsonInstanceReaderResult = instanceReader.readFromObject(parsedContent, new JsonPath());
 
