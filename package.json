@@ -1,4 +1,26 @@
 {
+  "name": "cedar-model-typescript-library-roundtrip",
+  "version": "0.2.0",
+  "description": "CEDAR Model Typescript Library RoundTrip",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "prettier": "prettier --write .",
+    "link": "npm link cedar-model-typescript-library"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metadatacenter/cedar-model-typescript-library-roundtrip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/metadatacenter/cedar-model-typescript-library-roundtrip/issues"
+  },
+  "homepage": "https://github.com/metadatacenter/cedar-model-typescript-library-roundtrip#readme",
   "devDependencies": {
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
@@ -12,6 +34,9 @@
     "prettier": "^3.2.5",
     "typescript": "^5.4.3"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "jszip": "^3.10.1"
   }
