@@ -1,6 +1,6 @@
 {
   "name": "cedar-model-typescript-library-roundtrip",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CEDAR Model Typescript Library RoundTrip",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -38,7 +38,7 @@
     "dist"
   ],
   "dependencies": {
-    "cedar-model-typescript-library": "^0.2.0",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "yaml": "^2.4.5"
   }
 }

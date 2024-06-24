@@ -4,7 +4,7 @@ import { ResourceLogBuilder } from './ResourceLogBuilder';
 export class ResourceLog {
   orderNumber: number;
   type: string;
-  UUID: string = '';
+  uuid: string = '';
   id: string;
   name: string;
   computedPath: string;
@@ -13,7 +13,7 @@ export class ResourceLog {
   compareErrorCount: number = 0;
   compareWarningCount: number = 0;
   parsingErrors: ComparisonError[];
-  compareResultErrors: ComparisonError[];
+  compareResultErrors: ComparisonError[] = [];
   compareResultWarnings: ComparisonError[];
   exception: Error | null;
   sourceJSON: JsonNode;

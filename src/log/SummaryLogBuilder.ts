@@ -3,7 +3,7 @@ import { SummaryLog } from './SummaryLog';
 export class SummaryLogBuilder {
   orderNumber: number;
   type: string;
-  UUID: string;
+  uuid: string;
   id: string;
   name: string;
   computedPath: string;
@@ -20,7 +20,7 @@ export class SummaryLogBuilder {
   constructor() {
     this.orderNumber = 0;
     this.type = '';
-    this.UUID = '';
+    this.uuid = '';
     this.id = '';
     this.name = '';
     this.computedPath = '';
@@ -45,8 +45,8 @@ export class SummaryLogBuilder {
     return this;
   }
 
-  withUUID(UUID: string): SummaryLogBuilder {
-    this.UUID = UUID;
+  withUuid(uuid: string): SummaryLogBuilder {
+    this.uuid = uuid;
     return this;
   }
 

@@ -21,8 +21,8 @@ import { ErrorKey } from '../model/ErrorKey';
 export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
   private orderCounter = 0;
-  private resourceExportStartPath = '/export-prod-2024-04-03/resources';
-  private roundTripLogPath = '/roundtrip';
+  private resourceExportStartPath = '/export/resources';
+  private roundTripLogPath = '/export-converted-ts';
   private logProcessor: LogProcessor;
   //
   private logSummary: SummaryLog[] = [];
@@ -106,6 +106,7 @@ export class ExportResourceEnumerator {
         let parsedContent: JsonNode = {};
         let reSerialized: JsonNode = {};
         let exception: any | null = null;
+        let doSave = true;
         if (contentJson) {
           try {
             parsedContent = ResourceContentParser.parseContentJson(contentJson);
@@ -121,6 +122,7 @@ export class ExportResourceEnumerator {
             } else if (cedarResource.getType() == 'instance') {
               ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
                 InstanceContentComparator.compare(parsedContent));
+              doSave = false;
             }
           } catch (e) {
             exception = e;
@@ -147,8 +149,9 @@ export class ExportResourceEnumerator {
         // if (exception !== null) {
         //   doLog = true;
         // }
-        if (doLog) {
-          const logObject: ResourceLog = ResourceLogBuilder.withOrderNumber(cedarResource.getOrderNumber())
+        if (doLog && doSave) {
+          const logObject: ResourceLog = new ResourceLogBuilder()
+            .withOrderNumber(cedarResource.getOrderNumber())
             .withId(cedarResource.getId())
             .withName(cedarResource.getName())
             .withComputedPath(cedarResource.getComputedPath())
@@ -166,7 +169,7 @@ export class ExportResourceEnumerator {
           const builder = new SummaryLogBuilder()
             .withOrderNumber(logObject.orderNumber)
             .withType(logObject.type)
-            .withUUID(logObject.UUID)
+            .withUuid(logObject.uuid)
             .withId(logObject.id)
             .withName(logObject.name)
             .withComputedPath(logObject.computedPath)

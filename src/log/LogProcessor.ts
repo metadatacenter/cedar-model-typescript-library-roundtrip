@@ -10,12 +10,15 @@ export class LogProcessor {
   }
 
   public processLog(logObject: ResourceLog): void {
-    const uuid = this.extractUUID(logObject.id);
+    const uuid = this.extractUuid(logObject.id);
     if (!uuid) {
-      console.error('Invalid ID format, UUID not found');
+      console.error('Invalid ID format, uuid not found');
       return;
     }
-    logObject.UUID = uuid;
+    logObject.uuid = uuid;
+    // TODO:uncomment this
+    logObject.compareResultErrors = [];
+
     logObject.parsingErrorCount = logObject.parsingErrors.length;
     logObject.compareErrorCount = logObject.compareResultErrors.length;
     logObject.compareWarningCount = logObject.compareResultWarnings.length;
@@ -23,7 +26,7 @@ export class LogProcessor {
     this.saveLogObject(logObject, uuid, shardFolder);
   }
 
-  private extractUUID(id: string): string | null {
+  private extractUuid(id: string): string | null {
     const parts = id.split('/');
     return parts.pop() || null;
   }

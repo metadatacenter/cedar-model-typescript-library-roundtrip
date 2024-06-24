@@ -2,23 +2,37 @@ import { ComparisonError, JsonNode } from 'cedar-model-typescript-library';
 import { ResourceLog } from './ResourceLog';
 
 export class ResourceLogBuilder {
-  orderNumber: number = -1;
-  type: string = '';
-  id: string = '';
-  name: string = '';
-  computedPath: string = '';
-  physicalPath: string = '';
-  parsingErrors: ComparisonError[] = [];
-  compareResultErrors: ComparisonError[] = [];
-  compareResultWarnings: ComparisonError[] = [];
-  exception: Error | null = null;
-  sourceJSON: JsonNode = {};
-  targetJSON: JsonNode = {};
+  orderNumber: number;
+  type: string;
+  id: string;
+  name: string;
+  computedPath: string;
+  physicalPath: string;
+  parsingErrors: ComparisonError[];
+  compareResultErrors: ComparisonError[];
+  compareResultWarnings: ComparisonError[];
+  exception: Error | null;
+  sourceJSON: JsonNode;
+  targetJSON: JsonNode;
 
-  static withOrderNumber(orderNumber: number): ResourceLogBuilder {
-    const builder = new ResourceLogBuilder();
-    builder.orderNumber = orderNumber;
-    return builder;
+  constructor() {
+    this.orderNumber = -1;
+    this.type = '';
+    this.id = '';
+    this.name = '';
+    this.computedPath = '';
+    this.physicalPath = '';
+    this.parsingErrors = [];
+    this.compareResultErrors = [];
+    this.compareResultWarnings = [];
+    this.exception = null;
+    this.sourceJSON = {};
+    this.targetJSON = {};
+  }
+
+  withOrderNumber(orderNumber: number): ResourceLogBuilder {
+    this.orderNumber = orderNumber;
+    return this;
   }
 
   withType(type: string): ResourceLogBuilder {
