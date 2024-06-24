@@ -18,6 +18,7 @@ export class LogProcessor {
     logObject.uuid = uuid;
     // TODO:uncomment this
     logObject.compareResultErrors = [];
+    logObject.parsingErrors = [];
 
     logObject.parsingErrorCount = logObject.parsingErrors.length;
     logObject.compareErrorCount = logObject.compareResultErrors.length;
