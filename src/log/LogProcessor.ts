@@ -16,7 +16,7 @@ export class LogProcessor {
       return;
     }
     logObject.uuid = uuid;
-    // TODO:uncomment this
+    // TODO:uncomment this if you need the parsing and comparison errors
     logObject.compareResultErrors = [];
     logObject.parsingErrors = [];
 
