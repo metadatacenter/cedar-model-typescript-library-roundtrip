@@ -38,6 +38,7 @@
     "dist"
   ],
   "dependencies": {
+    "cedar-model-typescript-library": "^0.3.0",
     "jszip": "^3.10.1",
     "yaml": "^2.4.5"
   }
