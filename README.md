@@ -16,12 +16,15 @@ npm run link
 ```
 Then in this project you will use the project through a symlink.
 
-Remove the `"cedar-model-typescript-library"` reference from the `package.json` file, then:
-
+1) Delete `node_modules`
+2) Remove the `"cedar-model-typescript-library"` reference from the `package.json` file
+3) Execute:
 ```shell
 npm install
 npm link cedar-model-typescript-library
 ```
+4) Put back the `"cedar-model-typescript-library"` reference into the `package.json` file
+ 
 
 ## How to run
 
