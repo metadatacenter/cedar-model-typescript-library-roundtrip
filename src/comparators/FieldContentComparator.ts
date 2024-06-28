@@ -22,7 +22,7 @@ export class FieldContentComparator {
     const readers: CedarJsonReaders = CedarReaders.json().getStrict();
     const fieldReader: JsonTemplateFieldReader = readers.getTemplateFieldReader();
 
-    const jsonFieldReaderResult = fieldReader.readFromObject(parsedContent, ChildDeploymentInfo.empty(), new JsonPath());
+    const jsonFieldReaderResult = fieldReader.readFromObject(parsedContent, ChildDeploymentInfo.standalone(), new JsonPath());
 
     const parsingResultErrors = jsonFieldReaderResult.parsingResult.getBlueprintComparisonErrors();
 
