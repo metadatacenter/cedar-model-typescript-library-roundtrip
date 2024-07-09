@@ -13,7 +13,7 @@ import {
 } from 'cedar-model-typescript-library';
 
 export class ElementContentComparator {
-  static compare(parsedContent: any): {
+  static compare(parsedContent: JsonNode): {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
     compareResultWarnings: ComparisonError[];

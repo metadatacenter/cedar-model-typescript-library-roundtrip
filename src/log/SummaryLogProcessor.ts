@@ -3,7 +3,7 @@ import * as path from 'path';
 import { SummaryLog } from './SummaryLog';
 
 export class SummaryLogProcessor {
-  private folderPrefix: string;
+  private readonly folderPrefix: string;
 
   constructor(folderPrefix: string) {
     this.folderPrefix = folderPrefix;

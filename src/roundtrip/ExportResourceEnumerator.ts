@@ -105,7 +105,7 @@ export class ExportResourceEnumerator {
         let compareResultWarnings: ComparisonError[] = [];
         let parsedContent: JsonNode = {};
         let reSerialized: JsonNode = {};
-        let exception: any | null = null;
+        let exception: unknown | null = null;
         let doSave = true;
         if (contentJson) {
           try {
@@ -168,7 +168,7 @@ export class ExportResourceEnumerator {
             .withCompareResultWarnings(compareResultWarnings)
             .withSourceJSON(parsedContent)
             .withTargetJSON(reSerialized)
-            .withException(exception)
+            .withException(exception as Error)
             .build();
           this.logProcessor.processLog(logObject);
 

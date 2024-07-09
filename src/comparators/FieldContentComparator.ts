@@ -3,17 +3,15 @@ import {
   CedarJsonWriters,
   CedarReaders,
   CedarWriters,
-  ChildDeploymentInfo,
   ComparisonError,
   JsonNode,
-  JsonPath,
   JsonTemplateFieldReader,
   JsonTemplateFieldWriter,
   RoundTrip,
 } from 'cedar-model-typescript-library';
 
 export class FieldContentComparator {
-  static compare(parsedContent: any): {
+  static compare(parsedContent: JsonNode): {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
     compareResultWarnings: ComparisonError[];

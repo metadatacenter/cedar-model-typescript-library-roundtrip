@@ -1,8 +1,8 @@
 import { ComparisonError } from 'cedar-model-typescript-library';
 
 export class ErrorKey {
-  private errorType: string;
-  private errorPath: string;
+  private readonly errorType: string;
+  private readonly errorPath: string;
 
   constructor(errorType: string, errorPath: string) {
     this.errorType = errorType;

@@ -1,10 +1,10 @@
 export class CedarResource {
-  private type: string;
-  private id: string;
-  private name: string;
-  private computedPath: string;
-  private physicalPath: string;
-  private orderNumber: number;
+  private readonly type: string;
+  private readonly id: string;
+  private readonly name: string;
+  private readonly computedPath: string;
+  private readonly physicalPath: string;
+  private readonly orderNumber: number;
 
   public constructor(type: string, id: string, name: string, computedPath: string, physicalPath: string, orderNumber: number) {
     // Update constructor
