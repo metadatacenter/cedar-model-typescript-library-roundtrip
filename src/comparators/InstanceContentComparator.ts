@@ -12,7 +12,8 @@ export class InstanceContentComparator {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
     compareResultWarnings: ComparisonError[];
-    reSerialized: JsonNode;
+    reSerializedJSON: JsonNode;
+    reSerializedYAML: string;
   } {
     const readers: CedarJsonReaders = CedarReaders.json().getStrict();
     const instanceReader: JsonTemplateInstanceReader = readers.getTemplateInstanceReader();
@@ -23,12 +24,14 @@ export class InstanceContentComparator {
 
     const compareResultErrors: ComparisonError[] = [];
     const compareResultWarnings: ComparisonError[] = [];
-    const reSerialized = {};
+    const reSerializedJSON = jsonInstanceReaderResult.instanceSourceObject;
+    const reSerializedYAML: string = '';
     return {
       parsingResultErrors,
       compareResultErrors,
       compareResultWarnings,
-      reSerialized,
+      reSerializedJSON,
+      reSerializedYAML,
     };
   }
 }

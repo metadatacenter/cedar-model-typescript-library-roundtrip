@@ -22,7 +22,9 @@ export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
   private orderCounter = 0;
   private resourceExportStartPath = '/export/resources';
-  private roundTripLogPath = '/export-converted-ts';
+  private roundTripLogPath = '/export-converted-ts/logs';
+  private roundTripExportJSONPath = '/export-converted-ts/json';
+  private roundTripExportYAMLPath = '/export-converted-ts/yaml';
   private logProcessor: LogProcessor;
   //
   private logSummary: SummaryLog[] = [];
@@ -35,7 +37,9 @@ export class ExportResourceEnumerator {
   constructor() {
     this.resourceRootPath = path.join(Config.get().getCedarHome(), this.resourceExportStartPath);
     const logRootPath = path.join(Config.get().getCedarHome(), this.roundTripLogPath);
-    this.logProcessor = new LogProcessor(logRootPath);
+    const exportJSONPath = path.join(Config.get().getCedarHome(), this.roundTripExportJSONPath);
+    const exportYAMLPath = path.join(Config.get().getCedarHome(), this.roundTripExportYAMLPath);
+    this.logProcessor = new LogProcessor(logRootPath, exportJSONPath, exportYAMLPath);
     this.summaryLogProcessor = new SummaryLogProcessor(logRootPath);
   }
 
@@ -104,7 +108,8 @@ export class ExportResourceEnumerator {
         let compareResultErrors: ComparisonError[] = [];
         let compareResultWarnings: ComparisonError[] = [];
         let parsedContent: JsonNode = {};
-        let reSerialized: JsonNode = {};
+        let reSerializedJSON: JsonNode = {};
+        let reSerializedYAML: string = '';
         let exception: unknown | null = null;
         let doSave = true;
         if (contentJson) {
@@ -116,16 +121,16 @@ export class ExportResourceEnumerator {
             }
             if (doSave) {
               if (cedarResource.getType() == 'template') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
                   TemplateContentComparator.compare(parsedContent));
               } else if (cedarResource.getType() == 'element') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
                   ElementContentComparator.compare(parsedContent));
               } else if (cedarResource.getType() == 'field') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
                   FieldContentComparator.compare(parsedContent));
               } else if (cedarResource.getType() == 'instance') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerialized } =
+                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
                   InstanceContentComparator.compare(parsedContent));
                 doSave = false;
               }
@@ -155,6 +160,8 @@ export class ExportResourceEnumerator {
         // if (exception !== null) {
         //   doLog = true;
         // }
+        this.logProcessor.processJSON(cedarResource.getId(), reSerializedJSON, reSerializedYAML);
+
         if (doLog && doSave) {
           const logObject: ResourceLog = new ResourceLogBuilder()
             .withOrderNumber(cedarResource.getOrderNumber())
@@ -167,7 +174,7 @@ export class ExportResourceEnumerator {
             .withCompareResultErrors(compareResultErrors)
             .withCompareResultWarnings(compareResultWarnings)
             .withSourceJSON(parsedContent)
-            .withTargetJSON(reSerialized)
+            .withTargetJSON(reSerializedJSON)
             .withException(exception as Error)
             .build();
           this.logProcessor.processLog(logObject);
@@ -191,10 +198,10 @@ export class ExportResourceEnumerator {
             builder.withCSV2CEDAR((parsedContent['description'] as string).indexOf('CSV2CEDAR') >= 0);
           }
           this.logSummary.push(builder.build());
-          this.counter++;
-          if (this.counter % 1000 == 0) {
-            console.log(this.counter);
-          }
+        }
+        this.counter++;
+        if (this.counter % 1000 == 0) {
+          console.log(this.counter);
         }
       }
     }

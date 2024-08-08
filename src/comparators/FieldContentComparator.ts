@@ -3,11 +3,13 @@ import {
   CedarJsonWriters,
   CedarReaders,
   CedarWriters,
+  CedarYamlWriters,
   ComparisonError,
   JsonNode,
   JsonTemplateFieldReader,
   JsonTemplateFieldWriter,
   RoundTrip,
+  YamlTemplateFieldWriter,
 } from 'cedar-model-typescript-library';
 
 export class FieldContentComparator {
@@ -15,7 +17,8 @@ export class FieldContentComparator {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
     compareResultWarnings: ComparisonError[];
-    reSerialized: JsonNode;
+    reSerializedJSON: JsonNode;
+    reSerializedYAML: string;
   } {
     const readers: CedarJsonReaders = CedarReaders.json().getStrict();
     const fieldReader: JsonTemplateFieldReader = readers.getTemplateFieldReader();
@@ -26,7 +29,11 @@ export class FieldContentComparator {
 
     const writers: CedarJsonWriters = CedarWriters.json().getStrict();
     const jsonWriter: JsonTemplateFieldWriter = writers.getFieldWriterForField(jsonFieldReaderResult.field);
-    const reSerialized: JsonNode = jsonWriter.getAsJsonNode(jsonFieldReaderResult.field);
+    const reSerializedJSON: JsonNode = jsonWriter.getAsJsonNode(jsonFieldReaderResult.field);
+
+    const yamlWriters: CedarYamlWriters = CedarWriters.yaml().getStrict();
+    const yamlWriter: YamlTemplateFieldWriter = yamlWriters.getFieldWriterForField(jsonFieldReaderResult.field);
+    const reSerializedYAML: string = yamlWriter.getAsYamlString(jsonFieldReaderResult.field);
 
     const compareResult = RoundTrip.compare(jsonFieldReaderResult, jsonWriter);
     const compareResultErrors = compareResult.getBlueprintComparisonErrors();
@@ -36,7 +43,8 @@ export class FieldContentComparator {
       parsingResultErrors,
       compareResultErrors,
       compareResultWarnings,
-      reSerialized,
+      reSerializedJSON,
+      reSerializedYAML,
     };
   }
 }
