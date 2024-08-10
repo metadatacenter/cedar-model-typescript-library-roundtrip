@@ -2,7 +2,7 @@ import { ExportResourceEnumerator } from './roundtrip/ExportResourceEnumerator';
 
 const startedAt = new Date();
 const enumerator: ExportResourceEnumerator = new ExportResourceEnumerator();
-enumerator.parse().then(() => {
+enumerator.generateLOG().then(() => {
   const completedAt = new Date();
   console.log('Parsing started at   ' + startedAt.toISOString());
   console.log('Parsing completed at ' + completedAt.toISOString());

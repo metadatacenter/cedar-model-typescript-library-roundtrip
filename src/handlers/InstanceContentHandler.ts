@@ -7,13 +7,12 @@ import {
   JsonTemplateInstanceReader,
 } from 'cedar-model-typescript-library';
 
-export class InstanceContentComparator {
+export class InstanceContentHandler {
   static compare(parsedContent: JsonNode): {
     parsingResultErrors: ComparisonError[];
     compareResultErrors: ComparisonError[];
     compareResultWarnings: ComparisonError[];
     reSerializedJSON: JsonNode;
-    reSerializedYAML: string;
   } {
     const readers: CedarJsonReaders = CedarReaders.json().getStrict();
     const instanceReader: JsonTemplateInstanceReader = readers.getTemplateInstanceReader();
@@ -25,13 +24,19 @@ export class InstanceContentComparator {
     const compareResultErrors: ComparisonError[] = [];
     const compareResultWarnings: ComparisonError[] = [];
     const reSerializedJSON = jsonInstanceReaderResult.instanceSourceObject;
-    const reSerializedYAML: string = '';
     return {
       parsingResultErrors,
       compareResultErrors,
       compareResultWarnings,
       reSerializedJSON,
-      reSerializedYAML,
     };
+  }
+
+  static getYAML(_parsedContent: JsonNode): string | null {
+    return null;
+  }
+
+  static getJSON(_parsedContent: JsonNode): JsonNode | null {
+    return null;
   }
 }

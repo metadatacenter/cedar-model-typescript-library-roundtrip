@@ -5,9 +5,9 @@ import * as JSZip from 'jszip';
 import { CedarResource } from '../model/CedarResource';
 import { Config } from '../model/Config';
 import { ResourceContentParser } from './ResourceContentParser';
-import { TemplateContentComparator } from '../comparators/TemplateContentComparator';
-import { ElementContentComparator } from '../comparators/ElementContentComparator';
-import { FieldContentComparator } from '../comparators/FieldContentComparator';
+import { TemplateContentHandler } from '../handlers/TemplateContentHandler';
+import { ElementContentHandler } from '../handlers/ElementContentHandler';
+import { FieldContentHandler } from '../handlers/FieldContentHandler';
 import { ComparisonError, JsonNode } from 'cedar-model-typescript-library';
 import { LogProcessor } from '../log/LogProcessor';
 import { ResourceLogBuilder } from '../log/ResourceLogBuilder';
@@ -15,8 +15,9 @@ import { ResourceLog } from '../log/ResourceLog';
 import { SummaryLog } from '../log/SummaryLog';
 import { SummaryLogBuilder } from '../log/SummaryLogBuilder';
 import { SummaryLogProcessor } from '../log/SummaryLogProcessor';
-import { InstanceContentComparator } from '../comparators/InstanceContentComparator';
+import { InstanceContentHandler } from '../handlers/InstanceContentHandler';
 import { ErrorKey } from '../model/ErrorKey';
+import { OutputFormat } from '../model/OutputFormat';
 
 export class ExportResourceEnumerator {
   private readonly resourceRootPath: string;
@@ -43,16 +44,28 @@ export class ExportResourceEnumerator {
     this.summaryLogProcessor = new SummaryLogProcessor(logRootPath);
   }
 
-  public async parse(): Promise<void> {
+  public async generateLOG(): Promise<void> {
     this.counter = 0;
-    await this.parseDirectory(this.resourceRootPath);
+    await this.parseDirectory(this.resourceRootPath, OutputFormat.LOG);
     this.summaryLogProcessor.saveLogObject(this.logSummary);
     this.summaryLogProcessor.saveErrorStats(this.errorStats, `errors-all.json`);
     this.summaryLogProcessor.saveErrorStats(this.errorStatsLast2, `errors-last-2.json`);
     console.log('Total logged:' + this.logSummary.length);
   }
 
-  private async parseDirectory(directoryPath: string, virtualPath: string = ''): Promise<void> {
+  public async generateYAML(): Promise<void> {
+    this.counter = 0;
+    await this.parseDirectory(this.resourceRootPath, OutputFormat.YAML);
+    console.log('Total generated:' + this.logSummary.length);
+  }
+
+  public async generateJSON(): Promise<void> {
+    this.counter = 0;
+    await this.parseDirectory(this.resourceRootPath, OutputFormat.JSON);
+    console.log('Total generated:' + this.logSummary.length);
+  }
+
+  private async parseDirectory(directoryPath: string, outputFormat: OutputFormat, virtualPath: string = ''): Promise<void> {
     const shardDirectories = fs
       .readdirSync(directoryPath, { withFileTypes: true })
       .filter((dirent) => dirent.isDirectory())
@@ -68,7 +81,7 @@ export class ExportResourceEnumerator {
       for (const zipFile of zipFiles) {
         const zipFilePath = path.join(shardPath, zipFile.name);
         try {
-          await this.processZipFile(zipFilePath, virtualPath);
+          await this.processZipFile(zipFilePath, outputFormat, virtualPath);
         } catch (error) {
           console.error(`Error processing file ${zipFilePath}: ${error}`);
         }
@@ -76,7 +89,7 @@ export class ExportResourceEnumerator {
     }
   }
 
-  private async processZipFile(zipFilePath: string, virtualPath: string): Promise<void> {
+  private async processZipFile(zipFilePath: string, outputFormat: OutputFormat, virtualPath: string): Promise<void> {
     const data = fs.readFileSync(zipFilePath);
     const zip = await JSZip.loadAsync(data);
     const resourceJson = await zip.file('resource.json')?.async('string');
@@ -91,15 +104,12 @@ export class ExportResourceEnumerator {
         zipFilePath.replace(this.resourceRootPath, ''),
         ++this.orderCounter,
       );
-      // if (cedarResource.getOrderNumber() % 100 == 0) {
-      //   console.log(cedarResource.getOrderNumber());
-      // }
 
       // If it's a folder, we need to parse its contents too
       if (cedarResource.getType() === 'folder') {
         const contentFolderPath = zipFilePath.replace('.zip', '');
         if (fs.existsSync(contentFolderPath)) {
-          await this.parseDirectory(contentFolderPath, cedarResource.getComputedPath());
+          await this.parseDirectory(contentFolderPath, outputFormat, cedarResource.getComputedPath());
         }
       } else {
         // If artifact, we do the comparison
@@ -108,8 +118,8 @@ export class ExportResourceEnumerator {
         let compareResultErrors: ComparisonError[] = [];
         let compareResultWarnings: ComparisonError[] = [];
         let parsedContent: JsonNode = {};
-        let reSerializedJSON: JsonNode = {};
-        let reSerializedYAML: string = '';
+        let reSerializedJSON: JsonNode | null = null;
+        let reSerializedYAML: string | null = null;
         let exception: unknown | null = null;
         let doSave = true;
         if (contentJson) {
@@ -121,17 +131,41 @@ export class ExportResourceEnumerator {
             }
             if (doSave) {
               if (cedarResource.getType() == 'template') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
-                  TemplateContentComparator.compare(parsedContent));
+                if (outputFormat === OutputFormat.YAML) {
+                  reSerializedYAML = TemplateContentHandler.getYAML(parsedContent);
+                } else if (outputFormat === OutputFormat.JSON) {
+                  reSerializedJSON = TemplateContentHandler.getJSON(parsedContent);
+                } else {
+                  ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON } =
+                    TemplateContentHandler.compare(parsedContent));
+                }
               } else if (cedarResource.getType() == 'element') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
-                  ElementContentComparator.compare(parsedContent));
+                if (outputFormat === OutputFormat.YAML) {
+                  reSerializedYAML = ElementContentHandler.getYAML(parsedContent);
+                } else if (outputFormat === OutputFormat.JSON) {
+                  reSerializedJSON = ElementContentHandler.getJSON(parsedContent);
+                } else {
+                  ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON } =
+                    ElementContentHandler.compare(parsedContent));
+                }
               } else if (cedarResource.getType() == 'field') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
-                  FieldContentComparator.compare(parsedContent));
+                if (outputFormat === OutputFormat.YAML) {
+                  reSerializedYAML = FieldContentHandler.getYAML(parsedContent);
+                } else if (outputFormat === OutputFormat.JSON) {
+                  reSerializedJSON = FieldContentHandler.getJSON(parsedContent);
+                } else {
+                  ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON } =
+                    FieldContentHandler.compare(parsedContent));
+                }
               } else if (cedarResource.getType() == 'instance') {
-                ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON, reSerializedYAML } =
-                  InstanceContentComparator.compare(parsedContent));
+                if (outputFormat === OutputFormat.YAML) {
+                  reSerializedYAML = InstanceContentHandler.getYAML(parsedContent);
+                } else if (outputFormat === OutputFormat.JSON) {
+                  reSerializedJSON = InstanceContentHandler.getJSON(parsedContent);
+                } else {
+                  ({ parsingResultErrors, compareResultErrors, compareResultWarnings, reSerializedJSON } =
+                    InstanceContentHandler.compare(parsedContent));
+                }
                 doSave = false;
               }
             }
@@ -140,29 +174,14 @@ export class ExportResourceEnumerator {
           }
         }
 
-        for (const error of [...parsingResultErrors, ...compareResultErrors, ...compareResultWarnings]) {
-          const key = ErrorKey.fromComparisonError(error).toString();
-          this.errorStats.set(key, (this.errorStats.get(key) || 0) + 1);
-          const key2 = ErrorKey.fromComparisonErrorPartial(error, 2).toString();
-          this.errorStatsLast2.set(key2, (this.errorStatsLast2.get(key2) || 0) + 1);
-        }
+        if (outputFormat === OutputFormat.LOG && doSave) {
+          for (const error of [...parsingResultErrors, ...compareResultErrors, ...compareResultWarnings]) {
+            const key = ErrorKey.fromComparisonError(error).toString();
+            this.errorStats.set(key, (this.errorStats.get(key) || 0) + 1);
+            const key2 = ErrorKey.fromComparisonErrorPartial(error, 2).toString();
+            this.errorStatsLast2.set(key2, (this.errorStatsLast2.get(key2) || 0) + 1);
+          }
 
-        const doLog = true;
-        // if (parsingResultErrors.length > 0) {
-        //   doLog = true;
-        // }
-        // if (compareResultErrors.length > 0) {
-        //   doLog = true;
-        // }
-        // if (compareResultWarnings.length > 0) {
-        //   doLog = true;
-        // }
-        // if (exception !== null) {
-        //   doLog = true;
-        // }
-        this.logProcessor.processJSON(cedarResource.getId(), reSerializedJSON, reSerializedYAML);
-
-        if (doLog && doSave) {
           const logObject: ResourceLog = new ResourceLogBuilder()
             .withOrderNumber(cedarResource.getOrderNumber())
             .withId(cedarResource.getId())
@@ -199,6 +218,15 @@ export class ExportResourceEnumerator {
           }
           this.logSummary.push(builder.build());
         }
+
+        if (outputFormat === OutputFormat.YAML && doSave && reSerializedYAML !== null) {
+          this.logProcessor.saveYAML(cedarResource.getId(), reSerializedYAML);
+        }
+
+        if (outputFormat === OutputFormat.JSON && doSave && reSerializedJSON !== null) {
+          this.logProcessor.saveJSON(cedarResource.getId(), reSerializedJSON);
+        }
+
         this.counter++;
         if (this.counter % 1000 == 0) {
           console.log(this.counter);

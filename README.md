@@ -30,5 +30,5 @@ npm link cedar-model-typescript-library
 
 Run one of the files:
 ```shell
-npx ts-node src/processExport.ts
+npx ts-node src/generateLOG.ts
 ```

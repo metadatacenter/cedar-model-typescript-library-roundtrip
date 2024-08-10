@@ -17,7 +17,7 @@ export class ResourceLog {
   compareResultWarnings: ComparisonError[];
   exception: Error | null;
   sourceJSON: JsonNode;
-  targetJSON: JsonNode;
+  targetJSON: JsonNode | null;
 
   constructor(builder: ResourceLogBuilder) {
     this.orderNumber = builder.orderNumber;

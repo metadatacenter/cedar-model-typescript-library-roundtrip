@@ -32,7 +32,7 @@ export class LogProcessor {
     this.saveLogObject(logObject, uuid, shardFolder);
   }
 
-  public processJSON(id: string, reSerializedJSON: JsonNode, reSerializedYAML: string): void {
+  public saveJSON(id: string, reSerializedJSON: JsonNode): void {
     const uuid = this.extractUuid(id);
     if (!uuid) {
       console.error('Invalid ID format, uuid not found');
@@ -40,6 +40,14 @@ export class LogProcessor {
     }
     const shardExportJSONFolder = this.getShardFolder(uuid, this.exportJSONPrefix);
     this.saveJSONObject(reSerializedJSON, uuid, shardExportJSONFolder);
+  }
+
+  public saveYAML(id: string, reSerializedYAML: string): void {
+    const uuid = this.extractUuid(id);
+    if (!uuid) {
+      console.error('Invalid ID format, uuid not found');
+      return;
+    }
     if (reSerializedYAML !== '') {
       const shardExportYAMLFolder = this.getShardFolder(uuid, this.exportYAMLPrefix);
       this.saveYAMLObject(reSerializedYAML, uuid, shardExportYAMLFolder);

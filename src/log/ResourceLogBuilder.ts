@@ -13,7 +13,7 @@ export class ResourceLogBuilder {
   compareResultWarnings: ComparisonError[];
   exception: Error | null;
   sourceJSON: JsonNode;
-  targetJSON: JsonNode;
+  targetJSON: JsonNode | null;
 
   constructor() {
     this.orderNumber = -1;
@@ -85,7 +85,7 @@ export class ResourceLogBuilder {
     return this;
   }
 
-  withTargetJSON(targetJSON: JsonNode): ResourceLogBuilder {
+  withTargetJSON(targetJSON: JsonNode | null): ResourceLogBuilder {
     this.targetJSON = targetJSON;
     return this;
   }
