@@ -4,10 +4,8 @@ import {
   CedarReaders,
   CedarWriters,
   CedarYamlWriters,
-  ChildDeploymentInfo,
   ComparisonError,
   JsonNode,
-  JsonPath,
   JsonTemplateElementReader,
   JsonTemplateElementWriter,
   RoundTrip,
@@ -30,11 +28,7 @@ export class ElementContentHandler {
     compareResultWarnings: ComparisonError[];
     reSerializedJSON: JsonNode;
   } {
-    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(
-      parsedContent,
-      ChildDeploymentInfo.empty(),
-      new JsonPath(),
-    );
+    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(parsedContent);
 
     const parsingResultErrors = jsonElementReaderResult.parsingResult.getBlueprintComparisonErrors();
 
@@ -53,20 +47,12 @@ export class ElementContentHandler {
   }
 
   static getYAML(parsedContent: JsonNode): string {
-    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(
-      parsedContent,
-      ChildDeploymentInfo.empty(),
-      new JsonPath(),
-    );
+    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(parsedContent);
     return ElementContentHandler.yamlElementWriter.getAsYamlString(jsonElementReaderResult.element);
   }
 
   static getJSON(parsedContent: JsonNode): JsonNode {
-    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(
-      parsedContent,
-      ChildDeploymentInfo.empty(),
-      new JsonPath(),
-    );
+    const jsonElementReaderResult = ElementContentHandler.jsonElementReader.readFromObject(parsedContent);
     return ElementContentHandler.jsonElementWriter.getAsJsonNode(jsonElementReaderResult.element);
   }
 }
