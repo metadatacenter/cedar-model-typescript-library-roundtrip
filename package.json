@@ -8,6 +8,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "prettier": "prettier --write .",
+    "format:check": "prettier --check src",
     "link": "npm link cedar-model-typescript-library"
   },
   "repository": {

@@ -40,11 +40,12 @@ jobs:
       - name: Install
         run: npm ci
 
-      # Scoped to src: README.md and tsconfig.json are not Prettier-clean, and
-      # reformatting either of them belongs to its own change rather than to the
-      # commit that starts checking. Every file under src/ already passes.
+      # format:check scopes Prettier to src, where every file already conforms.
+      # README.md and tsconfig.json do not, and reformatting either of them
+      # belongs to its own change. Running it through the script keeps the
+      # command developers use and the command CI runs identical.
       - name: Check formatting
-        run: npx prettier --check src
+        run: npm run format:check
 
       # There is no test script, so compilation is the rest of the gate. It is
       # still a real one: tsconfig.json sets "strict", dist/ is not committed,
