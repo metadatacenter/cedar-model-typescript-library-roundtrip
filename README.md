@@ -1,5 +1,7 @@
 # CEDAR Model Typescript Library Roundtrip
 
+[![CI](https://github.com/metadatacenter/cedar-model-typescript-library-roundtrip/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/metadatacenter/cedar-model-typescript-library-roundtrip/actions/workflows/ci.yml)
+
 ## How to install with the library from npmjs
 ```shell
 npm install

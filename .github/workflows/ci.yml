@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile (Node 24)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # One checkout is enough: cedar-model-typescript-library is resolved from
+      # the npm registry at the version package-lock.json pins, not from the
+      # sibling clone the `link` script wires up for local development.
+      - name: Check out the round-trip harness
+        uses: actions/checkout@v7
+
+      # 24.19.0, the version cedar-model-typescript-library and CEE both build
+      # with, so the harness and the library it exercises share an interpreter.
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.19.0
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # There is no test script, so compilation is the whole gate. It is still a
+      # real one: tsconfig.json sets "strict", dist/ is not committed, and the
+      # harness constructs artifacts through the library's own types — so a
+      # breaking change to those types fails here.
+      - name: Build
+        run: npm run build
