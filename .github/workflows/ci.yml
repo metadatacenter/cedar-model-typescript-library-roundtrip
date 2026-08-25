@@ -40,10 +40,10 @@ jobs:
       - name: Install
         run: npm ci
 
-      # format:check scopes Prettier to src, where every file already conforms.
-      # README.md and tsconfig.json do not, and reformatting either of them
-      # belongs to its own change. Running it through the script keeps the
-      # command developers use and the command CI runs identical.
+      # format:check covers the whole tree, with node_modules and dist excluded
+      # by .prettierignore. It is the read-only counterpart to the `prettier`
+      # script, which writes; running it through a script keeps the command
+      # developers use and the command CI runs identical.
       - name: Check formatting
         run: npm run format:check
 
