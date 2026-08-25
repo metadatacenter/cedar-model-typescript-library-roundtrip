@@ -40,9 +40,15 @@ jobs:
       - name: Install
         run: npm ci
 
-      # There is no test script, so compilation is the whole gate. It is still a
-      # real one: tsconfig.json sets "strict", dist/ is not committed, and the
-      # harness constructs artifacts through the library's own types — so a
-      # breaking change to those types fails here.
+      # Scoped to src: README.md and tsconfig.json are not Prettier-clean, and
+      # reformatting either of them belongs to its own change rather than to the
+      # commit that starts checking. Every file under src/ already passes.
+      - name: Check formatting
+        run: npx prettier --check src
+
+      # There is no test script, so compilation is the rest of the gate. It is
+      # still a real one: tsconfig.json sets "strict", dist/ is not committed,
+      # and the harness constructs artifacts through the library's own types —
+      # so a breaking change to those types fails here.
       - name: Build
         run: npm run build
