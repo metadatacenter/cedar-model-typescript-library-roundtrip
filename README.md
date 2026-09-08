@@ -1,31 +1,15 @@
 # CEDAR Model Typescript Library Roundtrip
 
-## How to install with the library from npmjs
-```shell
-npm install
-```
+> [!WARNING]
+> This repository is deprecated and archived. It is no longer maintained or
+> included in CEDAR builds and releases.
 
-## How to install while developing the library
-You will need to build and link `cedar-model-typescript-library` it locally.
-Clone the [repo](https://github.com/metadatacenter/cedar-model-typescript-library), check out the `develop` branch, and then:
+Reader, writer, round-trip, compatibility-corpus, Java/TypeScript parity, and
+published-package tests now live with the maintained
+[CEDAR Model TypeScript Library](https://github.com/metadatacenter/cedar-model-typescript-library).
+See its [test suite](https://github.com/metadatacenter/cedar-model-typescript-library/tree/main/test),
+[integration tests](https://github.com/metadatacenter/cedar-model-typescript-library/tree/main/itest),
+and [CI workflow](https://github.com/metadatacenter/cedar-model-typescript-library/blob/main/.github/workflows/test.yml).
 
-```shell
-npm install
-npm run build
-npm run link
-```
-Then in this project you will use the project through a symlink.
-
-Remove the `"cedar-model-typescript-library"` reference from the `package.json` file, then:
-
-```shell
-npm install
-npm link cedar-model-typescript-library
-```
-
-## How to run
-
-Run one of the files:
-```shell
-npx ts-node src/processExport.ts
-```
+This repository remains available only as historical reference for the former
+manual production-export analysis harness.
